@@ -1,0 +1,55 @@
+3 43 1
+1 22 3
+2 32 5
+0 16 7
+
+insert index 0:
+end of recursion
+
+insert 22 (3):
+
+43 < 22?
+false
+	index 0
+	-> insert at 0
+
+22 1
+43 3
+32 5
+16 7
+
+insert 32 (5)
+
+43 < 32?
+false
+	22 < 32?
+	true
+	insert 32 after 22
+
+22 1
+32 3
+43 5
+16 7
+
+insert 16 (7)
+
+43 < 16?
+false
+	32 < 16?
+	false
+		22 < 16?
+		false
+			index 0
+			insert 16
+
+16 1
+22 3
+32 5
+43 7
+
+start der rekursion erreicht
+
+
+
+for some reason jacobsthal insertion order is:
+3, 2, 5, 4, 11, 10, 9, 8, 7, 6
