@@ -15,27 +15,24 @@ PmergeMe::PmergeMe(std::string& sequence)
 	std::istringstream	iss(sequence);
 	int					num;
 
-	_unorderedNumbers = 0;
-
 	while (iss >> num)
 	{
-		_vector.push_back(num);
+		_unsortedVector.push_back(num);
 		_unsortedList.push_back(num);
-		_unorderedNumbers++;
 	}
+
 	if (!iss.eof())
 		throw std::runtime_error("Error: input string could not be parsed.");
 }
 
-PmergeMe::PmergeMe(const PmergeMe& other) : _unorderedNumbers(other._unorderedNumbers), _vector(other._vector), _unsortedList(other._unsortedList) {}
+PmergeMe::PmergeMe(const PmergeMe& other) : _unsortedVector(other._unsortedVector), _unsortedList(other._unsortedList) {}
 
 PmergeMe&	PmergeMe::operator=(const PmergeMe& other)
 {
 	if (this != &other)
 	{
-		_vector = other._vector;
+		_unsortedVector = other._unsortedVector;
 		_unsortedList = other._unsortedList;
-		_unorderedNumbers = other._unorderedNumbers;
 	}
 
 	return (*this);
@@ -67,7 +64,7 @@ void	PmergeMe::_generateJacobsthal()
 	int	beforeLast = 0;
 	int	last = 1;
 
-	while (last < _unorderedNumbers)
+	while ((unsigned long) last <= _unsortedList.size())
 	{
 		int	j = last + 2 * beforeLast;
 		_jacobsthal.push_back(j);
@@ -81,7 +78,14 @@ void	PmergeMe::_generateJacobsthal()
 
 void	PmergeMe::printVector()
 {
-	for (std::vector<int>::const_iterator it = _vector.begin(); it != _vector.end(); it++)
+	for (std::vector<int>::const_iterator it = _unsortedVector.begin(); it != _unsortedVector.end(); it++)
+		std::cout << *it << " ";
+	std::cout << std::endl;
+}
+
+void	PmergeMe::printSortedVector()
+{
+	for (std::vector<int>::const_iterator it = _sortedVector.begin(); it != _sortedVector.end(); it++)
 		std::cout << *it << " ";
 	std::cout << std::endl;
 }
@@ -110,14 +114,14 @@ void	PmergeMe::printResult()
 	double	elapsedTime = static_cast<double>(endTime - startTime);
 
 	std::cout << "Vector sorted in " << elapsedTime << " \n";
-	printVector();
+	printSortedVector();
 
-	//sort list
+	// sort list
 	startTime = clock();
 	_sortList();
 	endTime = clock();
 	elapsedTime = static_cast<double>(endTime - startTime);
 
 	std::cout << "List sorted in " << elapsedTime << " \n";
-	printList();
+	printSortedList();
 }

@@ -5,26 +5,31 @@
 class PmergeMe
 {
 private:
-	int					_unorderedNumbers;
-	std::vector<int>	_vector;
-	std::vector<int>	_jacobsthal;
-	std::vector<int>	_insertionSequence;
+	std::vector<int>	_unsortedVector;
+	std::vector<int>	_sortedVector;
+
 	std::list<int>		_unsortedList;
 	std::list<int>		_sortedList;
+
+	std::vector<int>	_jacobsthal;
+	std::vector<int>	_insertionSequence;
+
+	unsigned int		_comparisons;
 
 	void	_sortVector();
 	void	_sortPairsVector();
 	void	_sortByGreaterVector(std::vector<int>::iterator startIt);
 	void	_insertPairVector(std::vector<int>::iterator sortIt, std::vector<int>::iterator compareIt);
+	void	_mainChainVector(std::vector<int>::iterator endIt);
 	void	_insertSmallVector();
-	void	_mergeInsertVector(int value);
+	void	_binaryInsertVector(int value);
 
 	void	_sortList();
 	void	_sortPairsList();
-	void	_sortGreaterList(std::list<int>::iterator startIt);
-	void	_insertToOrdered(std::list<int>::iterator sortIt, std::list<int>::iterator compareIt);
+	void	_sortByGreaterList(std::list<int>::iterator startIt);
+	void	_insertPairList(std::list<int>::iterator sortIt, std::list<int>::iterator compareIt);
+	void	_mainChainList();
 	void	_insertSmallList();
-	void	_mergeInsertList(int value);
 
 	void	_generateInsertionSequence();
 	void	_generateJacobsthal();
@@ -37,6 +42,7 @@ public:
 	~PmergeMe();
 
 	void	printVector();
+	void	printSortedVector();
 	void	printList();
 	void	printSortedList();
 	void	printResult();
