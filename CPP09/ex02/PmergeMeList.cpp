@@ -79,11 +79,12 @@ void	PmergeMe::_mainChainList()
 	while (it != _unsortedList.end())
 	{
 		std::list<int>::iterator	moveIt = it;
+
 		it++;
 		_sortedList.splice(_sortedList.end(), _unsortedList, moveIt);
 
 		//check if there is an odd element at the end of the list
-		if (++it == _unsortedList.end())
+		if (it++ == _unsortedList.end())
 			return;
 	}
 }
@@ -103,6 +104,7 @@ void	PmergeMe::_insertSmallList()
 		for (std::list<int>::iterator orderedIt = _sortedList.begin(); orderedIt != _sortedList.end(); orderedIt++)
 		{
 			_comparisons++;
+
 			if (*orderedIt >= *listIt)
 			{
 				_sortedList.insert(orderedIt, *listIt);
@@ -118,13 +120,14 @@ void	PmergeMe::_sortList()
 
 	//1. sort pairs so that a < b
 	_sortPairsList();
+
 std::cout << "comparisons after pair sorting: " << _comparisons << std::endl;
 	//2. sort pairs by the bigger number. unpaired element is ignored.
 	std::list<int>::iterator	last = --_unsortedList.end();
 	if (_unsortedList.size() % 2 != 0)
 		last--;
-
 	_sortByGreaterList(last);
+
 std::cout << "comparisons after sorting by greater element: " << _comparisons << std::endl;
 	_mainChainList();
 

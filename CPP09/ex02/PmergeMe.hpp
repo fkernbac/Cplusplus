@@ -19,7 +19,7 @@ private:
 	void	_sortVector();
 	void	_sortPairsVector();
 	void	_sortByGreaterVector(std::vector<int>::iterator startIt);
-	void	_insertPairVector(std::vector<int>::iterator sortIt, std::vector<int>::iterator compareIt);
+	void	_insertPairVector(int bigger, int smaller, std::vector<int>::iterator compareIt);
 	void	_mainChainVector(std::vector<int>::iterator endIt);
 	void	_insertSmallVector();
 	void	_binaryInsertVector(int value);

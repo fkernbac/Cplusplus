@@ -17,44 +17,37 @@ void	PmergeMe::_sortPairsVector()
 /*Recursive function for inserting at the front.*/
 void	PmergeMe::_sortByGreaterVector(std::vector<int>::iterator startIt)
 {
-	if (startIt <= _unsortedVector.begin() + 1)
+	int	bigger = *startIt;
+	int	smaller = *--startIt;
+
+	if (startIt <= _unsortedVector.begin())
 		return;
 
-	_sortByGreaterVector(startIt - 2);
-	_insertPairVector(startIt, startIt - 2);
+	_sortByGreaterVector(startIt - 1);
+
+	startIt = _unsortedVector.erase(startIt, startIt + 2);
+	_insertPairVector(bigger, smaller, startIt - 1);
 }
 
 /*Recursive function for finding the right spot for insertion.*/
-void	PmergeMe::_insertPairVector(std::vector<int>::iterator sortIt, std::vector<int>::iterator compareIt)
+void	PmergeMe::_insertPairVector(int bigger, int smaller, std::vector<int>::iterator compareIt)
 {
 		_comparisons++;
-std::cout << *compareIt << " < " << *sortIt << "?\n";
-	if (*compareIt < *sortIt)
+
+	if (*compareIt < bigger)
 	{
-		int	bigger = *sortIt;
-		int	smaller = *--sortIt;
-
 		compareIt++;
-
-		sortIt = _unsortedVector.erase(sortIt);
-		_unsortedVector.erase(sortIt);
 
 		_unsortedVector.insert(compareIt, bigger);
 		_unsortedVector.insert(compareIt, smaller);
 	}
-	else if (compareIt == _unsortedVector.begin())
+	else if (compareIt == ++_unsortedVector.begin())
 	{
-		int	bigger = *sortIt;
-		int	smaller = *--sortIt;
-
-		sortIt = _unsortedVector.erase(sortIt);
-		_unsortedVector.erase(sortIt);
-
-		_unsortedVector.push_back(bigger);
-		_unsortedVector.push_back(smaller);
+		_unsortedVector.insert(_unsortedVector.begin(), bigger);
+		_unsortedVector.insert(_unsortedVector.begin(), smaller);
 	}
 	else
-		_insertPairVector(sortIt, compareIt - 2);
+		_insertPairVector(bigger, smaller, compareIt - 2);
 }
 
 void	PmergeMe::_mainChainVector(std::vector<int>::iterator endIt)
@@ -81,7 +74,7 @@ void	PmergeMe::_insertSmallVector()
 		for (std::vector<int>::iterator orderedIt = _sortedVector.begin(); orderedIt != _sortedVector.end(); orderedIt++)
 		{
 			_comparisons++;
-std::cout << *orderedIt << " < " << _unsortedVector[*it] << "?\n";
+
 			if (*orderedIt >= _unsortedVector[*it])
 			{
 				_sortedVector.insert(orderedIt, _unsortedVector[*it]);
@@ -102,7 +95,7 @@ std::cout << "comparisons after pair sorting: " << _comparisons << std::endl;
 	std::vector<int>::iterator	lastIndex = --_unsortedVector.end();
 	if (_unsortedVector.size() % 2 != 0)
 		lastIndex--;
-printVector();
+
 	_sortByGreaterVector(lastIndex);
 std::cout << "comparisons after sorting by greater element: " << _comparisons << std::endl;
 	_mainChainVector(lastIndex);
