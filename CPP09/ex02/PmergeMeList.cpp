@@ -39,12 +39,7 @@ struct PairSecondComparator {
 
 void	PmergeMe::_sortByGreaterList()
 {
-	// PairSecondComparator	comparator;
-	// _pairList.sort(comparator);
-	// std::sort(_pairList.begin(), _pairList.end(), comparePairs);
 	_pairList.sort(comparePairs);
-	// for (std::list<std::pair<int, int> >::iterator it = _pairList.begin(); it != _pairList.end(); it++)
-	// 	_binaryInsertList(it);
 }
 
 void	PmergeMe::_mainChainList()
@@ -59,10 +54,10 @@ void	PmergeMe::_insertSmallList()
 {
 	int	insertedElements = 0;
 
-	for (std::vector<int>::iterator it = _jacobsthal.begin(); it != _jacobsthal.end(); it++)
+	for (unsigned int i = 0; i < _jacobsthal.size(); i++)
 	{
-		std::list<std::pair<int, int> >::iterator groupIt = _pairList.begin();
-		std::advance(groupIt, *it + insertedElements);
+		std::list<std::pair<int, int> >::iterator	groupIt = _pairList.begin();
+		std::advance(groupIt, _jacobsthal[i] + insertedElements);
 
 		//insert each element before this element
 		int	insertedGroupElements = 0;
@@ -89,7 +84,7 @@ void	PmergeMe::_insertSmallList()
 			insertedGroupElements++;
 
 			groupIt = _pairList.begin();
-			std::advance(groupIt,  *it + insertedElements - insertedGroupElements);
+			std::advance(groupIt, _jacobsthal[i] + insertedElements - insertedGroupElements);
 		}
 	}
 	if (_unsortedVector.size() % 2 != 0)
@@ -114,19 +109,41 @@ void	PmergeMe::_binaryInsertList(std::list<std::pair<int, int> >::iterator sortI
 
 void	PmergeMe::_sortList()
 {
+	clock_t	startTime;
+	clock_t	endTime;
+	double	time;
+
 	_makePairsList();
 
 	//1. sort pairs so that a < b
+	startTime = clock();
+
 	_sortPairsList();
 
+	endTime = clock();
+	time = static_cast<double>(endTime - startTime);
+	std::cout << "_sortPairsList(): " << time << "\n";
+
 	//2. sort pairs by the bigger number. unpaired element is ignored.
+	startTime = clock();
 	_sortByGreaterList();
 
+	endTime = clock();
+	time = static_cast<double>(endTime - startTime);
+	std::cout << "_sortByGreaterList(): " << time << "\n";
+
+	//3. set up sorted part
 	_mainChainList();
 
-	//3. generate jacobsthal sequence
+	//4. generate jacobsthal sequence
 	_generateJacobsthal();
 
 	//5. insert the small numbers using this sequence
+	startTime = clock();
+
 	_insertSmallList();
+
+	endTime = clock();
+	time = static_cast<double>(endTime - startTime);
+	std::cout << "__insertSmallList(): " << time << "\n";
 }

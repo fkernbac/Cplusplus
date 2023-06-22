@@ -28,7 +28,6 @@ private:
 	void	_insertSmallList();
 	void	_binaryInsertList(std::list<std::pair<int, int> >::iterator sortIt);
 
-	void	_generateInsertionSequence();
 	void	_generateJacobsthal();
 
 public:
@@ -38,6 +37,7 @@ public:
 	PmergeMe&	operator=(const PmergeMe& other);
 	~PmergeMe();
 
+	void	printUnsorted();
 	void	printVector();
 	void	printPairVector();
 	void	printList();

@@ -98,19 +98,42 @@ void	PmergeMe::_binaryInsertVector(std::pair<int, int> insertElement, std::vecto
 
 void	PmergeMe::_sortVector()
 {
+	clock_t	startTime;
+	clock_t	endTime;
+	double	time;
+
 	_makePairsVector();
 
 	//1. sort pairs so that a < b
+	startTime = clock();
+
 	_sortPairsVector();
 
+	endTime = clock();
+	time = static_cast<double>(endTime - startTime);
+	std::cout << "_sortPairsVector(): " << time << "\n";
+
 	//2. sort pairs by the bigger number. unpaired element is ignored.
+	startTime = clock();
+
 	_sortByGreaterVector();
 
+	endTime = clock();
+	time = static_cast<double>(endTime - startTime);
+	std::cout << "_sortByGreaterVector(): " << time << "\n";
+
+	//3. set up sorted part
 	_mainChainVector();
 
-	//3. generate jacobsthal sequence
+	//4. generate jacobsthal sequence
 	_generateJacobsthal();
 
 	//5. insert the small numbers using this sequence
+	startTime = clock();
+
 	_insertSmallVector();
+
+	endTime = clock();
+	time = static_cast<double>(endTime - startTime);
+	std::cout << "__insertSmallVector(): " << time << "\n";
 }

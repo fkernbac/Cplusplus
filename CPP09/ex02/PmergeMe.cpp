@@ -5,6 +5,7 @@
 #include <sstream>
 #include <algorithm>
 #include <ctime>
+#include <iomanip>
 
 /* CONSTRUCTORS ==============================================================*/
 
@@ -17,6 +18,8 @@ PmergeMe::PmergeMe(std::string& sequence)
 
 	while (iss >> num)
 	{
+		if (num < 0)
+			throw std::runtime_error("Error: negative numbers are not allowed.");
 		_unsortedVector.push_back(num);
 	}
 
@@ -60,33 +63,30 @@ void	PmergeMe::_generateJacobsthal()
 		last = next;
 		}
 
+	// Fit the last index to the actual sequence
 	std::vector<int>::iterator	lastIndex = _jacobsthal.end() - 1;
 
 	while ((unsigned long) *lastIndex > _unsortedVector.size() / 2)
 		*lastIndex = *lastIndex - 1;
-
-	// _jacobsthal.clear();
-
-	// int	beforeLast = 0;
-	// int	last = 1;
-
-	// while ((unsigned long) last <= _unsortedList.size())
-	// {
-	// 	int	j = last + 2 * beforeLast;
-	// 	_jacobsthal.push_back(j);
-
-	// 	beforeLast = last;
-	// 	last = j;
-	// }
 }
 
 /* FUNCTIONS =================================================================*/
 
+/*Returns true if the bigger element of a is smaller than b.*/
 bool	PmergeMe::comparePairs(const std::pair<int, int>& a, const std::pair<int, int>& b)
 {
 	return a.second < b.second;
 }
 
+void	PmergeMe::printUnsorted()
+{
+	for (std::vector<int>::const_iterator it = _unsortedVector.begin(); it != _unsortedVector.end(); ++it)
+		std::cout << *it << " ";
+
+	std::cout << "\n";
+}
+
+/*Prints the pairs in the vector.*/
 void	PmergeMe::printPairVector()
 {
 	for (std::vector<std::pair<int, int> >::const_iterator it = _pairVector.begin(); it != _pairVector.end(); ++it)
@@ -95,13 +95,16 @@ void	PmergeMe::printPairVector()
 	std::cout << "\n";
 }
 
+/*Prints the main chain of the vector.*/
 void	PmergeMe::printVector()
 {
-	for (std::vector<int>::const_iterator it = _unsortedVector.begin(); it != _unsortedVector.end(); it++)
-		std::cout << *it << " ";
-	std::cout << std::endl;
+	for (std::vector<std::pair<int, int> >::const_iterator it = _pairVector.begin(); it != _pairVector.end(); it++)
+		std::cout << it->second << " ";
+
+	std::cout << "\n";
 }
 
+/*Prints the pairs in the list.*/
 void	PmergeMe::printPairList()
 {
 	for (std::list<std::pair<int, int> >::const_iterator it = _pairList.begin(); it != _pairList.end(); ++it)
@@ -110,6 +113,16 @@ void	PmergeMe::printPairList()
 	std::cout << "\n";
 }
 
+/*Prints the main chain of the list.*/
+void	PmergeMe::printList()
+{
+	for (std::list<std::pair<int, int> >::const_iterator it = _pairList.begin(); it != _pairList.end(); ++it)
+		std::cout << it->second << " ";
+
+	std::cout << "\n";
+}
+
+/*Sorts the given sequence and prints the times.*/
 void	PmergeMe::printResult()
 {
 	//sort vector
@@ -117,17 +130,22 @@ void	PmergeMe::printResult()
 	_sortVector();
 	clock_t	endTime = clock();
 
-	double	elapsedTime = static_cast<double>(endTime - startTime);
-
-	std::cout << "Vector sorted in " << elapsedTime << " \n";
-	printPairVector();
+	double	timeVector = static_cast<double>(endTime - startTime) / CLOCKS_PER_SEC * 1000;
 
 	// sort list
 	startTime = clock();
 	_sortList();
 	endTime = clock();
-	elapsedTime = static_cast<double>(endTime - startTime);
 
-	std::cout << "List sorted in " << elapsedTime << " \n";
-	printPairList();
+	double	timeList = static_cast<double>(endTime - startTime) * 1000 / CLOCKS_PER_SEC;
+
+	//print unsorted sequence
+	std::cout << "Before:\t";
+	// printUnsorted();
+	std::cout << "After:\t";
+	// printVector();
+
+	//print times
+	std::cout << std::fixed << std::setprecision(5) << "Time to process a range of " << _unsortedVector.size() << " elements with std::vector: " << timeVector << " ms\n";
+	std::cout << std::fixed << std::setprecision(5) << "Time to process a range of " << _unsortedVector.size() << " elements with std::list:   " << timeList << " ms\n";
 }
