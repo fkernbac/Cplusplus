@@ -1,113 +1,116 @@
 #include "PmergeMe.hpp"
 #include <iostream>
+#include <algorithm>
 
 
 /* VECTOR SORTING ALGORITHM =========================================================*/
 
+void	PmergeMe::_makePairsVector()
+{
+	// Iterate over the numbers vector, incrementing the iterator by 2 each time
+	for (std::vector<int>::const_iterator it = _unsortedVector.begin(); it != _unsortedVector.end(); std::advance(it, 2))
+	{
+		// Check if there are at least two elements remaining
+		if (it == --_unsortedVector.end())
+			return;
+		// Create a pair from the current and next elements
+		std::pair<int, int> pair(*it, *(it + 1));
+
+		// Add the pair to the pairs vector
+		_pairVector.push_back(pair);
+	}
+}
+
 void	PmergeMe::_sortPairsVector()
 {
-	for (std::vector<int>::iterator it = _unsortedVector.begin() + 1; it < _unsortedVector.end(); it += 2)
+	for (std::vector<std::pair<int, int> >::iterator it = _pairVector.begin(); it != _pairVector.end(); it++)
 	{
-		_comparisons++;
-		if (*(it - 1) > *it)
-			std::iter_swap(it - 1, it);
+		if (it->first > it->second)
+			std::swap(it->first, it->second);
 	}
 }
 
-/*Recursive function for inserting at the front.*/
-void	PmergeMe::_sortByGreaterVector(std::vector<int>::iterator startIt)
+void	PmergeMe::_sortByGreaterVector()
 {
-	int	bigger = *startIt;
-	int	smaller = *--startIt;
-
-	if (startIt <= _unsortedVector.begin())
-		return;
-
-	_sortByGreaterVector(startIt - 1);
-
-	startIt = _unsortedVector.erase(startIt, startIt + 2);
-	_insertPairVector(bigger, smaller, startIt - 1);
+	std::sort(_pairVector.begin(), _pairVector.end(), comparePairs);
 }
 
-/*Recursive function for finding the right spot for insertion.*/
-void	PmergeMe::_insertPairVector(int bigger, int smaller, std::vector<int>::iterator compareIt)
+void	PmergeMe::_mainChainVector()
 {
-		_comparisons++;
+	std::pair<int, int> firstElement = std::make_pair(-1, _pairVector[0].first);
 
-	if (*compareIt < bigger)
-	{
-		compareIt++;
-
-		_unsortedVector.insert(compareIt, bigger);
-		_unsortedVector.insert(compareIt, smaller);
-	}
-	else if (compareIt == ++_unsortedVector.begin())
-	{
-		_unsortedVector.insert(_unsortedVector.begin(), bigger);
-		_unsortedVector.insert(_unsortedVector.begin(), smaller);
-	}
-	else
-		_insertPairVector(bigger, smaller, compareIt - 2);
-}
-
-void	PmergeMe::_mainChainVector(std::vector<int>::iterator endIt)
-{
-	for (; endIt != _unsortedVector.begin(); endIt--)
-	{
-		_sortedVector.insert(_sortedVector.begin(), *endIt);
-		endIt = _unsortedVector.erase(endIt);
-		endIt--;
-		if (endIt == _unsortedVector.begin())
-			break;
-	}
-	_sortedVector.insert(_sortedVector.begin(), *endIt);
-	_unsortedVector.erase(endIt);
+	_pairVector[0].first = -1;
+	_pairVector.insert(_pairVector.begin(), firstElement);
 }
 
 void	PmergeMe::_insertSmallVector()
 {
-	for(std::vector<int>::iterator	it = _insertionSequence.begin(); it != _insertionSequence.end(); it++)
+	int	insertedElements = 0;
+
+	//iterate to first element of group
+	for (std::vector<int>::iterator it = _jacobsthal.begin(); it != _jacobsthal.end(); it++)
 	{
-		if ((unsigned long) *it > _unsortedVector.size() - 1)
-			continue;
+		std::vector<std::pair<int, int> >::iterator groupIt = _pairVector.begin() + *it + insertedElements;
 
-		for (std::vector<int>::iterator orderedIt = _sortedVector.begin(); orderedIt != _sortedVector.end(); orderedIt++)
+		//insert each element before this element
+		int	insertedGroupElements = 0;
+		while (1)
 		{
-			_comparisons++;
-
-			if (*orderedIt >= _unsortedVector[*it])
-			{
-				_sortedVector.insert(orderedIt, _unsortedVector[*it]);
+			for (; groupIt >= _pairVector.begin(); groupIt--)
+				if (groupIt->first != -1)
+					break;
+			if (groupIt <= _pairVector.begin())
 				break;
-			}
+
+			std::pair<int, int>	insertElement = std::make_pair(-1, groupIt->first);
+
+			groupIt->first = -1;
+
+			_binaryInsertVector(insertElement, _pairVector.begin(), groupIt);	//insertIt is the last element that is possibly smaller than what I'm inserting
+			insertedElements++;
+			insertedGroupElements++;
+
+			groupIt = _pairVector.begin() + *it + insertedElements - insertedGroupElements;
 		}
 	}
+	//if there is an odd element, insert it
+	if (_unsortedVector.size() % 2 != 0)
+	{
+		std::pair<int, int>	odd = std::make_pair(-1, _unsortedVector.back());
+
+		_binaryInsertVector(odd, _pairVector.begin(), _pairVector.end());
+	}
+}
+
+void	PmergeMe::_binaryInsertVector(std::pair<int, int> insertElement, std::vector<std::pair<int, int> >::iterator first, std::vector<std::pair<int, int> >::iterator last)
+{
+	while (first != last)
+	{
+		std::vector<std::pair<int, int> >::iterator	mid = first + std::distance(first, last) / 2;
+
+		if (insertElement.second < mid->second)
+			last = mid;
+		else
+			first = mid + 1;
+	}
+	_pairVector.insert(first, insertElement);
 }
 
 void	PmergeMe::_sortVector()
 {
-	_comparisons = 0;
+	_makePairsVector();
 
 	//1. sort pairs so that a < b
 	_sortPairsVector();
-std::cout << "comparisons after pair sorting: " << _comparisons << std::endl;
-	//2. sort pairs by the bigger number. unpaired element is ignored.
-	std::vector<int>::iterator	lastIndex = --_unsortedVector.end();
-	if (_unsortedVector.size() % 2 != 0)
-		lastIndex--;
 
-	_sortByGreaterVector(lastIndex);
-std::cout << "comparisons after sorting by greater element: " << _comparisons << std::endl;
-	_mainChainVector(lastIndex);
+	//2. sort pairs by the bigger number. unpaired element is ignored.
+	_sortByGreaterVector();
+
+	_mainChainVector();
 
 	//3. generate jacobsthal sequence
 	_generateJacobsthal();
 
-	//4. generete a sequence for inserting the unordered small numbers
-	_generateInsertionSequence();
-
 	//5. insert the small numbers using this sequence
 	_insertSmallVector();
-
-	std::cout << "comparisons needed: " << _comparisons << "\n";
 }

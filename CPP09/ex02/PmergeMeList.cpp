@@ -1,144 +1,132 @@
 #include "PmergeMe.hpp"
 #include <iostream>
+#include <algorithm>
 
 
 /* LIST SORTING ALGORITHM =========================================================*/
 
+void	PmergeMe::_makePairsList()
+{
+	// Iterate over the numbers vector, incrementing the iterator by 2 each time
+	for (std::vector<int>::const_iterator it = _unsortedVector.begin(); it != _unsortedVector.end(); std::advance(it, 2))
+	{
+		// Check if there are at least two elements remaining
+		if (it == --_unsortedVector.end())
+			return;
+		// Create a pair from the current and next elements
+		std::pair<int, int> pair(*it, *(it + 1));
+
+		// Add the pair to the pairs vector
+		_pairList.push_back(pair);
+	}
+}
+
 void	PmergeMe::_sortPairsList()
 {
-	for (std::list<int>::iterator it = _unsortedList.begin(); it != _unsortedList.end(); it++)
+	for (std::list<std::pair<int, int> >::iterator it = _pairList.begin(); it != _pairList.end(); it++)
 	{
-		//iterator at first element
-		std::list<int>::iterator	second = it;
-		second++;
-		//need to check if we exceeded the list
-		if (second == _unsortedList.end())
-			return;
-
-		_comparisons++;
-		if (*it > *second)
-			std::iter_swap(it, second);
-
-		//need to increment a second time to reach smaller element
-		it++;
+		if (it->first > it->second)
+			std::swap(it->first, it->second);
 	}
 }
 
-/*Recursive function for inserting at the front.*/
-void	PmergeMe::_sortByGreaterList(std::list<int>::iterator startIt)
-{
-	if (startIt == ++_unsortedList.begin())
-		return;
-
-	std::list<int>::iterator	nextPair = startIt;
-	nextPair--;
-	nextPair--;
-	_sortByGreaterList(nextPair);
-
-	nextPair = startIt;
-	nextPair--;
-	nextPair--;
-
-	_insertPairList(startIt, nextPair);
-}
-
-void	PmergeMe::_insertPairList(std::list<int>::iterator sortIt, std::list<int>::iterator compareIt)
-{
-	std::list<int>::iterator	smallElement = sortIt;
-	smallElement--;
-
-	_comparisons++;
-	if (*compareIt < *sortIt)
+struct PairSecondComparator {
+	bool operator()(const std::pair<int, int>& lhs, const std::pair<int, int>& rhs)
 	{
-		//increment because we need to insert after the smaller element
-		compareIt++;
-
-		//no need to insert an element if it is already the biggest one
-		if (compareIt == smallElement)
-			return;
-
-		_unsortedList.splice(compareIt, _unsortedList, smallElement, ++sortIt);
+		return lhs.second < rhs.second;
 	}
-	else if (compareIt == ++_unsortedList.begin())
-		_unsortedList.splice(_unsortedList.begin(), _unsortedList, smallElement, ++sortIt);
-	else
-	{
-		compareIt--;
-		compareIt--;
-		_insertPairList(sortIt, compareIt);
-	}
+};
+
+void	PmergeMe::_sortByGreaterList()
+{
+	// PairSecondComparator	comparator;
+	// _pairList.sort(comparator);
+	// std::sort(_pairList.begin(), _pairList.end(), comparePairs);
+	_pairList.sort(comparePairs);
+	// for (std::list<std::pair<int, int> >::iterator it = _pairList.begin(); it != _pairList.end(); it++)
+	// 	_binaryInsertList(it);
 }
 
 void	PmergeMe::_mainChainList()
 {
-	std::list<int>::iterator	it = ++_unsortedList.begin();
-	it++;
-	_sortedList.splice(_sortedList.begin(), _unsortedList, _unsortedList.begin(), it);
+	std::pair<int, int>	firstElement = std::make_pair(-1, _pairList.begin()->first);
 
-	it = ++_unsortedList.begin();
-	while (it != _unsortedList.end())
-	{
-		std::list<int>::iterator	moveIt = it;
-
-		it++;
-		_sortedList.splice(_sortedList.end(), _unsortedList, moveIt);
-
-		//check if there is an odd element at the end of the list
-		if (it++ == _unsortedList.end())
-			return;
-	}
+	_pairList.begin()->first = -1;
+	_pairList.insert(_pairList.begin(), firstElement);
 }
 
 void	PmergeMe::_insertSmallList()
 {
-	for (std::vector<int>::iterator it = _insertionSequence.begin(); it != _insertionSequence.end(); it++)
+	int	insertedElements = 0;
+
+	for (std::vector<int>::iterator it = _jacobsthal.begin(); it != _jacobsthal.end(); it++)
 	{
-		std::list<int>::iterator	listIt = _unsortedList.begin();
-		std::advance(listIt, *it);
+		std::list<std::pair<int, int> >::iterator groupIt = _pairList.begin();
+		std::advance(groupIt, *it + insertedElements);
 
-		//check if index is too big
-		if ((unsigned long) *it > _unsortedList.size() - 1)
-			continue;
-
-		//insert value into ordered list
-		for (std::list<int>::iterator orderedIt = _sortedList.begin(); orderedIt != _sortedList.end(); orderedIt++)
+		//insert each element before this element
+		int	insertedGroupElements = 0;
+		while (1)
 		{
-			_comparisons++;
-
-			if (*orderedIt >= *listIt)
-			{
-				_sortedList.insert(orderedIt, *listIt);
+			//find first small element that needs to be sorted
+			for (; groupIt != _pairList.begin(); groupIt--)
+				if (groupIt->first != -1)
+					break;
+			//check if all elements are sorted
+			if (groupIt == _pairList.begin())
 				break;
-			}
+
+			//create the new element
+			std::pair<int, int>	newPair = std::make_pair(-1, groupIt->first);
+			//remove element from original place
+			groupIt->first = -1;
+			//insert element in the main chain
+			groupIt = _pairList.insert(groupIt, newPair);
+
+			//sort all elements including this one
+			_binaryInsertList(groupIt);
+			insertedElements++;
+			insertedGroupElements++;
+
+			groupIt = _pairList.begin();
+			std::advance(groupIt,  *it + insertedElements - insertedGroupElements);
 		}
 	}
+	if (_unsortedVector.size() % 2 != 0)
+	{
+		std::pair<int, int>	odd = std::make_pair(-1, _unsortedVector.back());
+
+		_pairList.push_back(odd);
+		_pairList.sort(comparePairs);
+	}
+}
+
+void	PmergeMe::_binaryInsertList(std::list<std::pair<int, int> >::iterator sortIt)
+{
+	std::list<std::pair<int, int> >	unorderedList;
+	//cut list in ordered and unordered half
+	unorderedList.splice(unorderedList.begin(), _pairList, ++sortIt, _pairList.end());
+	//binary sort ordered half
+	_pairList.sort(comparePairs);
+	//merge lists back together
+	_pairList.splice(_pairList.end(), unorderedList);
 }
 
 void	PmergeMe::_sortList()
 {
-	_comparisons = 0;
+	_makePairsList();
 
 	//1. sort pairs so that a < b
 	_sortPairsList();
 
-std::cout << "comparisons after pair sorting: " << _comparisons << std::endl;
 	//2. sort pairs by the bigger number. unpaired element is ignored.
-	std::list<int>::iterator	last = --_unsortedList.end();
-	if (_unsortedList.size() % 2 != 0)
-		last--;
-	_sortByGreaterList(last);
+	_sortByGreaterList();
 
-std::cout << "comparisons after sorting by greater element: " << _comparisons << std::endl;
 	_mainChainList();
 
 	//3. generate jacobsthal sequence
 	_generateJacobsthal();
 
-	//4. generete a sequence for inserting the unordered small numbers
-	_generateInsertionSequence();
-
 	//5. insert the small numbers using this sequence
 	_insertSmallList();
-
-	std::cout << "comparisons needed: " << _comparisons << "\n";
 }

@@ -18,21 +18,19 @@ PmergeMe::PmergeMe(std::string& sequence)
 	while (iss >> num)
 	{
 		_unsortedVector.push_back(num);
-		_unsortedList.push_back(num);
 	}
 
 	if (!iss.eof())
 		throw std::runtime_error("Error: input string could not be parsed.");
 }
 
-PmergeMe::PmergeMe(const PmergeMe& other) : _unsortedVector(other._unsortedVector), _unsortedList(other._unsortedList) {}
+PmergeMe::PmergeMe(const PmergeMe& other) : _unsortedVector(other._unsortedVector) {}
 
 PmergeMe&	PmergeMe::operator=(const PmergeMe& other)
 {
 	if (this != &other)
 	{
 		_unsortedVector = other._unsortedVector;
-		_unsortedList = other._unsortedList;
 	}
 
 	return (*this);
@@ -43,38 +41,59 @@ PmergeMe::~PmergeMe() {}
 
 /* PRIVATE FUNCTIONS =========================================================*/
 
-void	PmergeMe::_generateInsertionSequence()
-{
-	int	lastJacobsthal = 0;
-
-	_insertionSequence.clear();
-
-	for (std::vector<int>::iterator it = _jacobsthal.begin(); it != _jacobsthal.end(); it++)
-	{
-		for (int j = *it; j > lastJacobsthal; j--)
-			_insertionSequence.push_back(j - 1);
-		lastJacobsthal = *it;
-	}
-}
-
 void	PmergeMe::_generateJacobsthal()
 {
+	// Initial Jacobsthal numbers
+	int beforelast = 1;
+	int last = 1;
+
+	// Clear the existing sequence
 	_jacobsthal.clear();
 
-	int	beforeLast = 0;
-	int	last = 1;
-
-	while ((unsigned long) last <= _unsortedList.size())
+	// Generate Jacobsthal sequence
+	while ((unsigned long) last <= _unsortedVector.size() / 2)		//needs fixing
 	{
-		int	j = last + 2 * beforeLast;
-		_jacobsthal.push_back(j);
+		int	next = last + 2 * beforelast;
+		_jacobsthal.push_back(next);
 
-		beforeLast = last;
-		last = j;
-	}
+		beforelast = last;
+		last = next;
+		}
+
+	std::vector<int>::iterator	lastIndex = _jacobsthal.end() - 1;
+
+	while ((unsigned long) *lastIndex > _unsortedVector.size() / 2)
+		*lastIndex = *lastIndex - 1;
+
+	// _jacobsthal.clear();
+
+	// int	beforeLast = 0;
+	// int	last = 1;
+
+	// while ((unsigned long) last <= _unsortedList.size())
+	// {
+	// 	int	j = last + 2 * beforeLast;
+	// 	_jacobsthal.push_back(j);
+
+	// 	beforeLast = last;
+	// 	last = j;
+	// }
 }
 
 /* FUNCTIONS =================================================================*/
+
+bool	PmergeMe::comparePairs(const std::pair<int, int>& a, const std::pair<int, int>& b)
+{
+	return a.second < b.second;
+}
+
+void	PmergeMe::printPairVector()
+{
+	for (std::vector<std::pair<int, int> >::const_iterator it = _pairVector.begin(); it != _pairVector.end(); ++it)
+		std::cout << "(" << it->first << ", " << it->second << ") ";
+
+	std::cout << "\n";
+}
 
 void	PmergeMe::printVector()
 {
@@ -83,25 +102,12 @@ void	PmergeMe::printVector()
 	std::cout << std::endl;
 }
 
-void	PmergeMe::printSortedVector()
+void	PmergeMe::printPairList()
 {
-	for (std::vector<int>::const_iterator it = _sortedVector.begin(); it != _sortedVector.end(); it++)
-		std::cout << *it << " ";
-	std::cout << std::endl;
-}
+	for (std::list<std::pair<int, int> >::const_iterator it = _pairList.begin(); it != _pairList.end(); ++it)
+		std::cout << "(" << it->first << ", " << it->second << ") ";
 
-void	PmergeMe::printList()
-{
-	for (std::list<int>::const_iterator it = _unsortedList.begin(); it != _unsortedList.end(); it++)
-		std::cout << *it << " ";
-	std::cout << std::endl;
-}
-
-void	PmergeMe::printSortedList()
-{
-	for (std::list<int>::const_iterator it = _sortedList.begin(); it != _sortedList.end(); it++)
-		std::cout << *it << " ";
-	std::cout << std::endl;
+	std::cout << "\n";
 }
 
 void	PmergeMe::printResult()
@@ -114,7 +120,7 @@ void	PmergeMe::printResult()
 	double	elapsedTime = static_cast<double>(endTime - startTime);
 
 	std::cout << "Vector sorted in " << elapsedTime << " \n";
-	printSortedVector();
+	printPairVector();
 
 	// sort list
 	startTime = clock();
@@ -123,5 +129,5 @@ void	PmergeMe::printResult()
 	elapsedTime = static_cast<double>(endTime - startTime);
 
 	std::cout << "List sorted in " << elapsedTime << " \n";
-	printSortedList();
+	printPairList();
 }
