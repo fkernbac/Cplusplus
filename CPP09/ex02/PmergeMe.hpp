@@ -26,7 +26,7 @@ private:
 	void	_sortByGreaterList();
 	void	_mainChainList();
 	void	_insertSmallList();
-	void	_binaryInsertList(std::list<std::pair<int, int> >::iterator sortIt);
+	void	_binaryInsertList(std::pair<int, int> element, std::list<std::pair<int, int> >::iterator high);
 
 	void	_generateJacobsthal();
 

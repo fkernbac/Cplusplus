@@ -30,13 +30,6 @@ void	PmergeMe::_sortPairsList()
 	}
 }
 
-struct PairSecondComparator {
-	bool operator()(const std::pair<int, int>& lhs, const std::pair<int, int>& rhs)
-	{
-		return lhs.second < rhs.second;
-	}
-};
-
 void	PmergeMe::_sortByGreaterList()
 {
 	_pairList.sort(comparePairs);
@@ -53,6 +46,7 @@ void	PmergeMe::_mainChainList()
 void	PmergeMe::_insertSmallList()
 {
 	int	insertedElements = 0;
+	int	groupSize = 2;
 
 	for (unsigned int i = 0; i < _jacobsthal.size(); i++)
 	{
@@ -61,7 +55,10 @@ void	PmergeMe::_insertSmallList()
 
 		//insert each element before this element
 		int	insertedGroupElements = 0;
-		while (1)
+		if (i > 0)
+			groupSize = _jacobsthal[i] - _jacobsthal[i - 1];
+
+		while (insertedGroupElements < groupSize)
 		{
 			//find first small element that needs to be sorted
 			for (; groupIt != _pairList.begin(); groupIt--)
@@ -75,36 +72,48 @@ void	PmergeMe::_insertSmallList()
 			std::pair<int, int>	newPair = std::make_pair(-1, groupIt->first);
 			//remove element from original place
 			groupIt->first = -1;
-			//insert element in the main chain
-			groupIt = _pairList.insert(groupIt, newPair);
+			groupIt--;
 
-			//sort all elements including this one
-			_binaryInsertList(groupIt);
+			//insert element in the main chain
+			_binaryInsertList(newPair, groupIt);
 			insertedElements++;
 			insertedGroupElements++;
-
-			groupIt = _pairList.begin();
-			std::advance(groupIt, _jacobsthal[i] + insertedElements - insertedGroupElements);
 		}
 	}
 	if (_unsortedVector.size() % 2 != 0)
 	{
 		std::pair<int, int>	odd = std::make_pair(-1, _unsortedVector.back());
 
-		_pairList.push_back(odd);
-		_pairList.sort(comparePairs);
+		_binaryInsertList(odd, _pairList.end());
+		// _pairList.push_back(odd);
+		// _pairList.sort(comparePairs);
 	}
 }
 
-void	PmergeMe::_binaryInsertList(std::list<std::pair<int, int> >::iterator sortIt)
+void	PmergeMe::_binaryInsertList(std::pair<int, int> element, std::list<std::pair<int, int> >::iterator high)
 {
-	std::list<std::pair<int, int> >	unorderedList;
+	// std::list<std::pair<int, int> >	unorderedList;
 	//cut list in ordered and unordered half
-	unorderedList.splice(unorderedList.begin(), _pairList, ++sortIt, _pairList.end());
+	// unorderedList.splice(unorderedList.begin(), _pairList, ++sortIt, _pairList.end());
 	//binary sort ordered half
-	_pairList.sort(comparePairs);
+	// _pairList.sort(comparePairs);
 	//merge lists back together
-	_pairList.splice(_pairList.end(), unorderedList);
+	// _pairList.splice(_pairList.end(), unorderedList);
+
+	std::list<std::pair<int, int> >::iterator low = _pairList.begin();
+
+	while (low != high)
+	{
+		std::list<std::pair<int, int> >::iterator mid = low;
+		std::advance(mid, std::distance(low, high) / 2);
+
+		if (element.second < mid->second)
+			high = mid;
+		else
+			low = ++mid;
+	}
+
+	_pairList.insert(low, element);
 }
 
 void	PmergeMe::_sortList()

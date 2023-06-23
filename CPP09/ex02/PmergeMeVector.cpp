@@ -46,15 +46,19 @@ void	PmergeMe::_mainChainVector()
 void	PmergeMe::_insertSmallVector()
 {
 	int	insertedElements = 0;
+	int	groupSize = 2;
 
 	//iterate to first element of group
-	for (std::vector<int>::iterator it = _jacobsthal.begin(); it != _jacobsthal.end(); it++)
+	for (unsigned int i = 0; i < _jacobsthal.size(); i++)
 	{
-		std::vector<std::pair<int, int> >::iterator groupIt = _pairVector.begin() + *it + insertedElements;
+		std::vector<std::pair<int, int> >::iterator groupIt = _pairVector.begin() + _jacobsthal[i] + insertedElements;
 
 		//insert each element before this element
 		int	insertedGroupElements = 0;
-		while (1)
+		if (i > 0)
+			groupSize = _jacobsthal[i] - _jacobsthal[i - 1];
+
+		while (insertedGroupElements < groupSize)
 		{
 			for (; groupIt >= _pairVector.begin(); groupIt--)
 				if (groupIt->first != -1)
@@ -65,12 +69,11 @@ void	PmergeMe::_insertSmallVector()
 			std::pair<int, int>	insertElement = std::make_pair(-1, groupIt->first);
 
 			groupIt->first = -1;
+			groupIt--;
 
 			_binaryInsertVector(insertElement, _pairVector.begin(), groupIt);	//insertIt is the last element that is possibly smaller than what I'm inserting
 			insertedElements++;
 			insertedGroupElements++;
-
-			groupIt = _pairVector.begin() + *it + insertedElements - insertedGroupElements;
 		}
 	}
 	//if there is an odd element, insert it

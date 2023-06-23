@@ -25,6 +25,8 @@ PmergeMe::PmergeMe(std::string& sequence)
 
 	if (!iss.eof())
 		throw std::runtime_error("Error: input string could not be parsed.");
+
+	_pairVector.reserve(_unsortedVector.size());
 }
 
 PmergeMe::PmergeMe(const PmergeMe& other) : _unsortedVector(other._unsortedVector) {}
@@ -47,6 +49,7 @@ PmergeMe::~PmergeMe() {}
 void	PmergeMe::_generateJacobsthal()
 {
 	// Initial Jacobsthal numbers
+	int	lastIndex = _unsortedVector.size() / 2;
 	int beforelast = 1;
 	int last = 1;
 
@@ -54,25 +57,24 @@ void	PmergeMe::_generateJacobsthal()
 	_jacobsthal.clear();
 
 	// Generate Jacobsthal sequence
-	while ((unsigned long) last <= _unsortedVector.size() / 2)		//needs fixing
+	while (last < lastIndex)
 	{
 		int	next = last + 2 * beforelast;
+		if (next >= lastIndex)
+			break;
 		_jacobsthal.push_back(next);
 
 		beforelast = last;
 		last = next;
-		}
+	}
 
-	// Fit the last index to the actual sequence
-	std::vector<int>::iterator	lastIndex = _jacobsthal.end() - 1;
-
-	while ((unsigned long) *lastIndex > _unsortedVector.size() / 2)
-		*lastIndex = *lastIndex - 1;
+	// make the last jacobsthal number the last index
+	_jacobsthal.push_back(lastIndex);
 }
 
 /* FUNCTIONS =================================================================*/
 
-/*Returns true if the bigger element of a is smaller than b.*/
+/*Returns true if a->second < b->second.*/
 bool	PmergeMe::comparePairs(const std::pair<int, int>& a, const std::pair<int, int>& b)
 {
 	return a.second < b.second;
@@ -125,6 +127,9 @@ void	PmergeMe::printList()
 /*Sorts the given sequence and prints the times.*/
 void	PmergeMe::printResult()
 {
+	if (_unsortedVector.size() <= 1)
+		throw std::runtime_error("Error: add more numbers");
+
 	//sort vector
 	clock_t	startTime = clock();
 	_sortVector();
@@ -141,9 +146,11 @@ void	PmergeMe::printResult()
 
 	//print unsorted sequence
 	std::cout << "Before:\t";
-	// printUnsorted();
+	printUnsorted();
 	std::cout << "After:\t";
-	// printVector();
+	printVector();
+	std::cout << "After:\t";
+	printList();
 
 	//print times
 	std::cout << std::fixed << std::setprecision(5) << "Time to process a range of " << _unsortedVector.size() << " elements with std::vector: " << timeVector << " ms\n";
