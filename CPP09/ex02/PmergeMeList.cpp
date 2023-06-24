@@ -8,10 +8,10 @@
 void	PmergeMe::_makePairsList()
 {
 	// Iterate over the numbers vector, incrementing the iterator by 2 each time
-	for (std::vector<int>::const_iterator it = _unsortedVector.begin(); it != _unsortedVector.end(); std::advance(it, 2))
+	for (std::vector<int>::const_iterator it = _unsorted.begin(); it != _unsorted.end(); std::advance(it, 2))
 	{
 		// Check if there are at least two elements remaining
-		if (it == --_unsortedVector.end())
+		if (it == --_unsorted.end())
 			return;
 		// Create a pair from the current and next elements
 		std::pair<int, int> pair(*it, *(it + 1));
@@ -53,17 +53,16 @@ void	PmergeMe::_insertSmallList()
 		std::list<std::pair<int, int> >::iterator	groupIt = _pairList.begin();
 		std::advance(groupIt, _jacobsthal[i] + insertedElements);
 
-		//insert each element before this element
 		int	insertedGroupElements = 0;
 		if (i > 0)
 			groupSize = _jacobsthal[i] - _jacobsthal[i - 1];
 
+		//insert each element before this element
 		while (insertedGroupElements < groupSize)
 		{
 			//find first small element that needs to be sorted
-			for (; groupIt != _pairList.begin(); groupIt--)
-				if (groupIt->first != -1)
-					break;
+			while (groupIt->first == -1 && groupIt != _pairList.begin())
+				groupIt--;
 			//check if all elements are sorted
 			if (groupIt == _pairList.begin())
 				break;
@@ -74,72 +73,58 @@ void	PmergeMe::_insertSmallList()
 			groupIt->first = -1;
 			groupIt--;
 
-			//insert element in the main chain
 			_binaryInsertList(newPair, groupIt);
+
 			insertedElements++;
 			insertedGroupElements++;
 		}
 	}
-	if (_unsortedVector.size() % 2 != 0)
-	{
-		std::pair<int, int>	odd = std::make_pair(-1, _unsortedVector.back());
-
-		_binaryInsertList(odd, _pairList.end());
-		// _pairList.push_back(odd);
-		// _pairList.sort(comparePairs);
-	}
+	//insert odd element if needed
+	if (_unsorted.size() % 2 != 0)
+		_binaryInsertList(std::make_pair(-1, _unsorted.back()), _pairList.end());
 }
 
-void	PmergeMe::_binaryInsertList(std::pair<int, int> element, std::list<std::pair<int, int> >::iterator high)
+void	PmergeMe::_binaryInsertList(std::pair<int, int> element, std::list<std::pair<int, int> >::iterator last)
 {
-	// std::list<std::pair<int, int> >	unorderedList;
-	//cut list in ordered and unordered half
-	// unorderedList.splice(unorderedList.begin(), _pairList, ++sortIt, _pairList.end());
-	//binary sort ordered half
-	// _pairList.sort(comparePairs);
-	//merge lists back together
-	// _pairList.splice(_pairList.end(), unorderedList);
+	std::list<std::pair<int, int> >::iterator first = _pairList.begin();
 
-	std::list<std::pair<int, int> >::iterator low = _pairList.begin();
-
-	while (low != high)
+	while (first != last)
 	{
-		std::list<std::pair<int, int> >::iterator mid = low;
-		std::advance(mid, std::distance(low, high) / 2);
+		std::list<std::pair<int, int> >::iterator mid = first;
+		std::advance(mid, std::distance(first, last) / 2);
 
 		if (element.second < mid->second)
-			high = mid;
+			last = mid;
 		else
-			low = ++mid;
+			first = ++mid;
 	}
 
-	_pairList.insert(low, element);
+	_pairList.insert(first, element);
 }
 
 void	PmergeMe::_sortList()
 {
-	clock_t	startTime;
-	clock_t	endTime;
-	double	time;
+	// clock_t	startTime;
+	// clock_t	endTime;
+	// double	time;
 
 	_makePairsList();
 
 	//1. sort pairs so that a < b
-	startTime = clock();
-
+	// startTime = clock();
 	_sortPairsList();
 
-	endTime = clock();
-	time = static_cast<double>(endTime - startTime);
-	std::cout << "_sortPairsList(): " << time << "\n";
+	// endTime = clock();
+	// time = static_cast<double>(endTime - startTime);
+	// std::cout << "_sortPairsList(): " << time << "\n";
 
 	//2. sort pairs by the bigger number. unpaired element is ignored.
-	startTime = clock();
+	// startTime = clock();
 	_sortByGreaterList();
 
-	endTime = clock();
-	time = static_cast<double>(endTime - startTime);
-	std::cout << "_sortByGreaterList(): " << time << "\n";
+	// endTime = clock();
+	// time = static_cast<double>(endTime - startTime);
+	// std::cout << "_sortByGreaterList(): " << time << "\n";
 
 	//3. set up sorted part
 	_mainChainList();
@@ -148,11 +133,10 @@ void	PmergeMe::_sortList()
 	_generateJacobsthal();
 
 	//5. insert the small numbers using this sequence
-	startTime = clock();
-
+	// startTime = clock();
 	_insertSmallList();
 
-	endTime = clock();
-	time = static_cast<double>(endTime - startTime);
-	std::cout << "__insertSmallList(): " << time << "\n";
+	// endTime = clock();
+	// time = static_cast<double>(endTime - startTime);
+	// std::cout << "__insertSmallList(): " << time << "\n";
 }

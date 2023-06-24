@@ -20,22 +20,25 @@ PmergeMe::PmergeMe(std::string& sequence)
 	{
 		if (num < 0)
 			throw std::runtime_error("Error: negative numbers are not allowed.");
-		_unsortedVector.push_back(num);
+		_unsorted.push_back(num);
 	}
 
+	//check for problematic user input
 	if (!iss.eof())
 		throw std::runtime_error("Error: input string could not be parsed.");
+	if (_unsorted.size() <= 1)
+		throw std::runtime_error("Error: no point in sorting 1 number");
 
-	_pairVector.reserve(_unsortedVector.size());
+	_pairVector.reserve(_unsorted.size());
 }
 
-PmergeMe::PmergeMe(const PmergeMe& other) : _unsortedVector(other._unsortedVector) {}
+PmergeMe::PmergeMe(const PmergeMe& other) : _unsorted(other._unsorted) {}
 
 PmergeMe&	PmergeMe::operator=(const PmergeMe& other)
 {
 	if (this != &other)
 	{
-		_unsortedVector = other._unsortedVector;
+		_unsorted = other._unsorted;
 	}
 
 	return (*this);
@@ -49,7 +52,7 @@ PmergeMe::~PmergeMe() {}
 void	PmergeMe::_generateJacobsthal()
 {
 	// Initial Jacobsthal numbers
-	int	lastIndex = _unsortedVector.size() / 2;
+	int	lastIndex = _unsorted.size() / 2;
 	int beforelast = 1;
 	int last = 1;
 
@@ -68,7 +71,7 @@ void	PmergeMe::_generateJacobsthal()
 		last = next;
 	}
 
-	// make the last jacobsthal number the last index
+	// Make the last jacobsthal number the last index
 	_jacobsthal.push_back(lastIndex);
 }
 
@@ -80,9 +83,10 @@ bool	PmergeMe::comparePairs(const std::pair<int, int>& a, const std::pair<int, i
 	return a.second < b.second;
 }
 
+/*Prints the original sequence.*/
 void	PmergeMe::printUnsorted()
 {
-	for (std::vector<int>::const_iterator it = _unsortedVector.begin(); it != _unsortedVector.end(); ++it)
+	for (std::vector<int>::const_iterator it = _unsorted.begin(); it != _unsorted.end(); ++it)
 		std::cout << *it << " ";
 
 	std::cout << "\n";
@@ -106,15 +110,6 @@ void	PmergeMe::printVector()
 	std::cout << "\n";
 }
 
-/*Prints the pairs in the list.*/
-void	PmergeMe::printPairList()
-{
-	for (std::list<std::pair<int, int> >::const_iterator it = _pairList.begin(); it != _pairList.end(); ++it)
-		std::cout << "(" << it->first << ", " << it->second << ") ";
-
-	std::cout << "\n";
-}
-
 /*Prints the main chain of the list.*/
 void	PmergeMe::printList()
 {
@@ -124,12 +119,18 @@ void	PmergeMe::printList()
 	std::cout << "\n";
 }
 
+/*Prints the pairs in the list.*/
+void	PmergeMe::printPairList()
+{
+	for (std::list<std::pair<int, int> >::const_iterator it = _pairList.begin(); it != _pairList.end(); ++it)
+		std::cout << "(" << it->first << ", " << it->second << ") ";
+
+	std::cout << "\n";
+}
+
 /*Sorts the given sequence and prints the times.*/
 void	PmergeMe::printResult()
 {
-	if (_unsortedVector.size() <= 1)
-		throw std::runtime_error("Error: add more numbers");
-
 	//sort vector
 	clock_t	startTime = clock();
 	_sortVector();
@@ -149,10 +150,10 @@ void	PmergeMe::printResult()
 	printUnsorted();
 	std::cout << "After:\t";
 	printVector();
-	std::cout << "After:\t";
-	printList();
+	// std::cout << "After:\t";
+	// printList();
 
 	//print times
-	std::cout << std::fixed << std::setprecision(5) << "Time to process a range of " << _unsortedVector.size() << " elements with std::vector: " << timeVector << " ms\n";
-	std::cout << std::fixed << std::setprecision(5) << "Time to process a range of " << _unsortedVector.size() << " elements with std::list:   " << timeList << " ms\n";
+	std::cout << std::fixed << std::setprecision(3) << "Time to process a range of " << _unsorted.size() << " elements with std::vector: " << timeVector << " ms\n";
+	std::cout << std::fixed << std::setprecision(3) << "Time to process a range of " << _unsorted.size() << " elements with std::list:   " << timeList << " ms\n";
 }

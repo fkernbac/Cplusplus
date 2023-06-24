@@ -50,17 +50,6 @@ void	BitcoinExchange::readData(const std::string& filename)
 	}
 }
 
-void	BitcoinExchange::readFile(const std::string& filename)
-{
-	std::ifstream	file(filename.c_str());
-	if (!file)
-		throw std::runtime_error("Error: file could not be opened.");
-
-	std::string	line;
-	while (std::getline(file, line))
-		_dates.push_back(line);
-}
-
 std::string	BitcoinExchange::_convertDate(const std::string& date)
 {
 	if (date.length() < 10)
@@ -70,11 +59,6 @@ std::string	BitcoinExchange::_convertDate(const std::string& date)
 
 	return (date.substr(0, 10));
 }
-
-/*
-2011-01-03 | 1000
-012345678901234567
-*/
 
 float	BitcoinExchange::_convertAmount(const std::string& s)
 {
@@ -107,20 +91,25 @@ float	BitcoinExchange::_getPrice(std::string& date, float amount)
 	return (amount * it->second);
 }
 
-void	BitcoinExchange::print()
+void	BitcoinExchange::print(const std::string& filename)
 {
-	std::list<std::string>::iterator	it;
+	std::ifstream	file(filename.c_str());
+	std::string		line;
 
-	for (it = _dates.begin(); it != _dates.end(); it++)
+	if (!file)
+		throw std::runtime_error("Error: file could not be opened.");
+
+	while (std::getline(file, line))
 	{
-		if ((*it).length() < 14)
-			std::cerr << "Error: bad input => " << *it;
+		if (line.length() < 14)
+			std::cerr << "Error: bad input => " << line;
 		else
 		{
 			try {
-				std::string	date = _convertDate(*it);
-				float		amount = _convertAmount((*it).substr(13, std::string::npos));
+				std::string	date = _convertDate(line);
+				float		amount = _convertAmount(line.substr(13, std::string::npos));
 				float		price = _getPrice(date, amount);
+
 				std::cout << date << " => " << amount << " = " << price;
 			}
 			catch (const std::exception& e)

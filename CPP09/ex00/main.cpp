@@ -16,8 +16,7 @@ int	main(int argc, char** argv)
 	try
 	{
 		database.readData(datafile);
-		database.readFile(argv[1]);
-		database.print();
+		database.print(argv[1]);
 	}
 	catch (std::exception& e)
 	{

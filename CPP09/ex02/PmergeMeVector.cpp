@@ -8,10 +8,10 @@
 void	PmergeMe::_makePairsVector()
 {
 	// Iterate over the numbers vector, incrementing the iterator by 2 each time
-	for (std::vector<int>::const_iterator it = _unsortedVector.begin(); it != _unsortedVector.end(); std::advance(it, 2))
+	for (std::vector<int>::const_iterator it = _unsorted.begin(); it != _unsorted.end(); std::advance(it, 2))
 	{
 		// Check if there are at least two elements remaining
-		if (it == --_unsortedVector.end())
+		if (it == --_unsorted.end())
 			return;
 		// Create a pair from the current and next elements
 		std::pair<int, int> pair(*it, *(it + 1));
@@ -51,79 +51,77 @@ void	PmergeMe::_insertSmallVector()
 	//iterate to first element of group
 	for (unsigned int i = 0; i < _jacobsthal.size(); i++)
 	{
-		std::vector<std::pair<int, int> >::iterator groupIt = _pairVector.begin() + _jacobsthal[i] + insertedElements;
-
-		//insert each element before this element
 		int	insertedGroupElements = 0;
 		if (i > 0)
 			groupSize = _jacobsthal[i] - _jacobsthal[i - 1];
 
+		//insert each element before this element
 		while (insertedGroupElements < groupSize)
 		{
-			for (; groupIt >= _pairVector.begin(); groupIt--)
-				if (groupIt->first != -1)
-					break;
+			std::vector<std::pair<int, int> >::iterator groupIt = _pairVector.begin() + _jacobsthal[i] + insertedElements - insertedGroupElements;
+			//search first element that hasn't been inserted yet
+			while (groupIt->first == -1 && groupIt != _pairVector.begin())
+				groupIt--;
 			if (groupIt <= _pairVector.begin())
 				break;
 
-			std::pair<int, int>	insertElement = std::make_pair(-1, groupIt->first);
+			std::pair<int, int>	element = std::make_pair(-1, groupIt->first);
 
 			groupIt->first = -1;
 			groupIt--;
 
-			_binaryInsertVector(insertElement, _pairVector.begin(), groupIt);	//insertIt is the last element that is possibly smaller than what I'm inserting
+			_binaryInsertVector(element, groupIt);
+
 			insertedElements++;
 			insertedGroupElements++;
 		}
 	}
 	//if there is an odd element, insert it
-	if (_unsortedVector.size() % 2 != 0)
-	{
-		std::pair<int, int>	odd = std::make_pair(-1, _unsortedVector.back());
-
-		_binaryInsertVector(odd, _pairVector.begin(), _pairVector.end());
-	}
+	if (_unsorted.size() % 2 != 0)
+		_binaryInsertVector(std::make_pair(-1, _unsorted.back()), _pairVector.end());
 }
 
-void	PmergeMe::_binaryInsertVector(std::pair<int, int> insertElement, std::vector<std::pair<int, int> >::iterator first, std::vector<std::pair<int, int> >::iterator last)
+void	PmergeMe::_binaryInsertVector(std::pair<int, int> element, std::vector<std::pair<int, int> >::iterator last)
 {
+	std::vector<std::pair<int, int> >::iterator first = _pairVector.begin();
+
 	while (first != last)
 	{
 		std::vector<std::pair<int, int> >::iterator	mid = first + std::distance(first, last) / 2;
 
-		if (insertElement.second < mid->second)
+		if (element.second < mid->second)
 			last = mid;
 		else
 			first = mid + 1;
 	}
-	_pairVector.insert(first, insertElement);
+
+	_pairVector.insert(first, element);
 }
 
 void	PmergeMe::_sortVector()
 {
-	clock_t	startTime;
-	clock_t	endTime;
-	double	time;
+	// clock_t	startTime;
+	// clock_t	endTime;
+	// double	time;
 
 	_makePairsVector();
 
 	//1. sort pairs so that a < b
-	startTime = clock();
-
+	// startTime = clock();
 	_sortPairsVector();
 
-	endTime = clock();
-	time = static_cast<double>(endTime - startTime);
-	std::cout << "_sortPairsVector(): " << time << "\n";
+	// endTime = clock();
+	// time = static_cast<double>(endTime - startTime);
+	// std::cout << "_sortPairsVector(): " << time << "\n";
 
 	//2. sort pairs by the bigger number. unpaired element is ignored.
-	startTime = clock();
+	// startTime = clock();
 
 	_sortByGreaterVector();
 
-	endTime = clock();
-	time = static_cast<double>(endTime - startTime);
-	std::cout << "_sortByGreaterVector(): " << time << "\n";
+	// endTime = clock();
+	// time = static_cast<double>(endTime - startTime);
+	// std::cout << "_sortByGreaterVector(): " << time << "\n";
 
 	//3. set up sorted part
 	_mainChainVector();
@@ -132,11 +130,10 @@ void	PmergeMe::_sortVector()
 	_generateJacobsthal();
 
 	//5. insert the small numbers using this sequence
-	startTime = clock();
-
+	// startTime = clock();
 	_insertSmallVector();
 
-	endTime = clock();
-	time = static_cast<double>(endTime - startTime);
-	std::cout << "__insertSmallVector(): " << time << "\n";
+	// endTime = clock();
+	// time = static_cast<double>(endTime - startTime);
+	// std::cout << "__insertSmallVector(): " << time << "\n";
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <map>
 #include <list>
 #include <string>
@@ -19,6 +21,5 @@ public:
 	~BitcoinExchange();
 
 	void	readData(const std::string& filename);
-	void	readFile(const std::string& filename);
-	void	print();
+	void	print(const std::string& filename);
 };
