@@ -1,18 +1,17 @@
 #include "TargetGenerator.hpp"
-#include "ASpell.hpp"
 
 TargetGenerator::TargetGenerator() {}
 
 TargetGenerator::TargetGenerator(const TargetGenerator& other)
 {
-	_spells = other._spells;
+	_targets = other._targets;
 }
 
 TargetGenerator&	TargetGenerator::operator=(const TargetGenerator& other)
 {
 	if (this != &other)
 	{
-		_spells = other._spells;
+		_targets = other._targets;
 	}
 
 	return (*this);
@@ -20,24 +19,25 @@ TargetGenerator&	TargetGenerator::operator=(const TargetGenerator& other)
 
 TargetGenerator::~TargetGenerator() {}
 
-void	TargetGenerator::learnSpell(ASpell* spell)
+void	TargetGenerator::learnTargetType(ATarget* target)
 {
-	_spells[spell->getName()] = spell;
+	if (target)
+		_targets[target->getType()] = target;
 }
 
-void	TargetGenerator::forgetSpell(const std::string& spellname)
+void	TargetGenerator::forgetTargetType(const std::string& type)
 {
-	std::map<std::string, ASpell*>::iterator	it = _spells.find(spellname);
+	std::map<std::string, ATarget*>::iterator	it = _targets.find(type);
 
-	if (it != _spells.end())
-		_spells.erase(it);
+	if (it != _targets.end())
+		_targets.erase(it);
 }
 
-ASpell*	TargetGenerator::createSpell(const std::string& spellname)
+ATarget*	TargetGenerator::createTarget(const std::string& type)
 {
-	std::map<std::string, ASpell*>::iterator	it = _spells.find(spellname);
+	std::map<std::string, ATarget*>::iterator	it = _targets.find(type);
 
-	if (it != _spells.end())
-		return (_spells[spellname].clone());
+	if (it != _targets.end())
+		return (_targets[type]->clone());
 	return (NULL);
 }

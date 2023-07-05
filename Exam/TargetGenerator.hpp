@@ -2,14 +2,14 @@
 
 #include <iostream>
 #include <map>
+#include "ATarget.hpp"
 
 class ASpell;
-class ATarget;
 
 class TargetGenerator
 {
 private:
-	std::map<std::string, ASpell*>	_spells;
+	std::map<std::string, ATarget*>	_targets;
 
 	TargetGenerator(const TargetGenerator& other);
 	TargetGenerator&	operator=(const TargetGenerator& other);
@@ -18,7 +18,7 @@ public:
 	TargetGenerator();
 	~TargetGenerator();
 
-	void	learnSpell(ASpell* spell);
-	void	forgetSpell(const std::string& spellname);
-	ASpell*	createSpell(const std::string& spellname);
+	void		learnTargetType(ATarget* target);
+	void		forgetTargetType(const std::string& type);
+	ATarget*	createTarget(const std::string& type);
 };

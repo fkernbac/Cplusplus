@@ -56,7 +56,8 @@ void	Warlock::introduce() const
 
 void	Warlock::learnSpell(ASpell* spell)
 {
-	_spellbook.learnSpell(spell);
+	if (spell)
+		_spellbook.learnSpell(spell);
 }
 
 void	Warlock::forgetSpell(std::string spellname)
@@ -66,7 +67,7 @@ void	Warlock::forgetSpell(std::string spellname)
 
 void	Warlock::launchSpell(std::string spellname, const ATarget& target)
 {
-	ASpell*	spell = createSpell(spellname);
+	ASpell*	spell = _spellbook.createSpell(spellname);
 	if (spell)
 	{
 		spell->launch(target);

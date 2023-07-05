@@ -1,10 +1,10 @@
 #pragma once
 
 #include <iostream>
+#include "SpellBook.hpp"
 
 class ASpell;
 class ATarget;
-class SpellBook;
 
 class Warlock
 {
