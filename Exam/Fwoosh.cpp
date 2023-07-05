@@ -1,11 +1,8 @@
 #include "Fwoosh.hpp"
 
-Fwoosh::Fwoosh() : _name("Fwoosh"), _effects("fwooshed")
-{
+Fwoosh::Fwoosh() : ASpell("Fwoosh", "fwooshed") {}
 
-}
-
-Fwoosh*	Fwoosh::clone() const
+ASpell*	Fwoosh::clone()
 {
 	return (new Fwoosh);
 }

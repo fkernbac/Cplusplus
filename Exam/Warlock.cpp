@@ -1,27 +1,37 @@
 #include "Warlock.hpp"
 #include "ASpell.hpp"
-#include <iostream>
+#include "ATarget.hpp"
 
-Warlock::Warlock(const std::string& name, const std::string& title) : _name(name), _title(title)
-{
-	std::cout << _name << ": This looks like another boring day.\n";
-}
-
-Warlock::~Warlock()
-{
-	std::cout << _name << ": My job here is done!\n";
-}
+Warlock::Warlock() {}
 
 Warlock::Warlock(const Warlock& other)
 {
-	(void)other;
+	_name = other._name;
+	_title = other._title;
 }
 
 Warlock&	Warlock::operator=(const Warlock& other)
 {
-	(void) other;
+	if (this != &other)
+	{
+		_name = other._name;
+		_title = other._title;
+	}
 
-	return *this;
+	return (*this);
+}
+
+Warlock::Warlock(const std::string& name, const std::string& title)
+{
+	_name = name;
+	_title = title;
+
+	std::cout << _name << ": This looks like another boring day.\n";
+
+}
+Warlock::~Warlock()
+{
+	std::cout << _name << ": My job here is done!\n";
 }
 
 const std::string&	Warlock::getName() const
@@ -46,10 +56,20 @@ void	Warlock::introduce() const
 
 void	Warlock::learnSpell(ASpell* spell)
 {
-	_spells.insert(spell);
+	_spellbook.learnSpell(spell);
 }
-void	Warlock::forgetSpell(std::string& name)
+
+void	Warlock::forgetSpell(std::string spellname)
 {
-	std::set<ASpell*>::iterator	it = _spells.find();
+	_spellbook.forgetSpell(spellname);
 }
-void	Warlock::launchSpell(std::string& spell, ATarget& target);
+
+void	Warlock::launchSpell(std::string spellname, const ATarget& target)
+{
+	ASpell*	spell = createSpell(spellname);
+	if (spell)
+	{
+		spell->launch(target);
+		delete spell;
+	}
+}

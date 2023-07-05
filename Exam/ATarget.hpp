@@ -1,15 +1,17 @@
 #pragma once
 
-#include <string>
+#include <iostream>
 
 class ASpell;
 
-class ATarget {
-
-private:
-
+class ATarget
+{
 protected:
 	std::string	_type;
+
+	ATarget();
+	ATarget(const ATarget& other);
+	ATarget&	operator=(const ATarget& other);
 
 public:
 	ATarget(const std::string& type);
@@ -17,7 +19,7 @@ public:
 
 	const std::string&	getType() const;
 
-	void				getHitBySpell(ASpell& spell);
-	virtual ATarget*	clone() const = 0;
+	void	getHitBySpell(const ASpell& spell) const;
 
+	virtual ATarget*	clone() = 0;
 };

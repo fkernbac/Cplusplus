@@ -4,15 +4,17 @@
 
 class ATarget;
 
-class ASpell {
-
-private:
-
+class ASpell
+{
 protected:
 	std::string	_name;
 	std::string	_effects;
 
 public:
+	ASpell();
+	ASpell(const ASpell& other);
+	ASpell&	operator=(const ASpell& other);
+
 	ASpell(const std::string& name, const std::string& effects);
 	virtual ~ASpell();
 
@@ -21,6 +23,5 @@ public:
 
 	void	launch(const ATarget& target);
 
-	virtual ASpell*	clone() const = 0;
-
+	virtual ASpell*	clone() = 0;
 };

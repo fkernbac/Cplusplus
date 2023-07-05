@@ -2,10 +2,10 @@
 
 #include "ASpell.hpp"
 
-class Fwoosh : public ASpell
+class Fireball : public ASpell
 {
 public:
-	Fwoosh();
+	Fireball();
 
 	ASpell*	clone();
 };

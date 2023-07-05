@@ -1,11 +1,10 @@
 #include "Dummy.hpp"
 
-Dummy::Dummy() : _type("Target Practice Dummy")
-{
+Dummy::Dummy() : ATarget("Target Practice Dummy") {}
 
-}
+Dummy::~Dummy() {}
 
-Dummy*	Dummy::clone() const
+ATarget*	Dummy::clone()
 {
 	return (new Dummy);
 }
